@@ -25,6 +25,7 @@ export default function Navbar() {
               <>
                 <Link to="/dashboard" className="hover:text-blue-200 transition">Dashboard</Link>
                 {role === 'customer' && <Link to="/book" className="hover:text-blue-200 transition">Book Shipment</Link>}
+                {role === 'customer' && <Link to="/track" className="hover:text-blue-200 transition">Track Shipment</Link>}
                 {(role === 'admin' || role === 'staff') && <Link to="/staff" className="hover:text-blue-200 transition">Staff Panel</Link>}
                 <button onClick={handleLogout} className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded shadow-sm text-sm font-semibold">Logout</button>
               </>

@@ -11,7 +11,7 @@ export const getTrackingHistory = async (req, res, next) => {
         
         // get status
         const [statusList] = await db.query('SELECT current_state, updated_at FROM shipment_status WHERE shipment_id = ?', [shipment.id]);
-        shipment.current_status = statusList.length > 0 ? statusList[0] : null;
+        shipment.current_status = statusList.length > 0 ? statusList[0].current_state : 'Booked';
         
         // get events
         const [events] = await db.query('SELECT * FROM tracking_events WHERE shipment_id = ? ORDER BY event_time DESC', [shipment.id]);

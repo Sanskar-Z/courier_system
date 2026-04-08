@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import BookShipment from './pages/BookShipment';
+import Tracking from './pages/Tracking';
 import StaffDashboard from './pages/StaffDashboard';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/book" element={<BookShipment />} />
+          <Route path="/track" element={<Tracking />} />
           <Route path="/staff" element={<StaffDashboard />} />
         </Routes>
       </main>
