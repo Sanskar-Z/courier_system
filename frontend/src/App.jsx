@@ -1,5 +1,6 @@
-import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import PublicLayout from './components/PublicLayout';
+import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -7,23 +8,31 @@ import Dashboard from './pages/Dashboard';
 import BookShipment from './pages/BookShipment';
 import Tracking from './pages/Tracking';
 import StaffDashboard from './pages/StaffDashboard';
+import ShipmentDetail from './pages/ShipmentDetail';
+import AuditLogs from './pages/AuditLogs';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-      <main className="flex-1 p-4">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/book" element={<BookShipment />} />
-          <Route path="/track" element={<Tracking />} />
-          <Route path="/staff" element={<StaffDashboard />} />
-        </Routes>
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<PublicLayout />}>
+          <Route index element={<Home />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+        </Route>
+
+        {/* Protected routes */}
+        <Route path="/" element={<Layout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="book" element={<BookShipment />} />
+          <Route path="track" element={<Tracking />} />
+          <Route path="staff" element={<StaffDashboard />} />
+          <Route path="shipment/:id" element={<ShipmentDetail />} />
+          <Route path="audit-logs" element={<AuditLogs />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
