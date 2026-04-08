@@ -1,15 +1,16 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+
 const app = express();
 
-const authRoutes = require('./routes/auth.routes');
-const shipmentRoutes = require('./routes/shipment.routes');
-const trackingRoutes = require('./routes/tracking.routes');
-const deliveryRoutes = require('./routes/delivery.routes');
-const hubsRoutes = require('./routes/hubs.routes');
-const couriersRoutes = require('./routes/couriers.routes');
-const employeesRoutes = require('./routes/employees.routes');
+import authRoutes from './routes/auth.routes.js';
+import shipmentRoutes from './routes/shipment.routes.js';
+import trackingRoutes from './routes/tracking.routes.js';
+import deliveryRoutes from './routes/delivery.routes.js';
+import hubsRoutes from './routes/hubs.routes.js';
+import couriersRoutes from './routes/couriers.routes.js';
+import employeesRoutes from './routes/employees.routes.js';
 
 app.use(cors());
 app.use(express.json());
@@ -26,7 +27,7 @@ app.get('/', (req, res) => res.json({ message: 'Courier System API' }));
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    res.status(err.status || 500).json({ error: err.status ? err.message : 'Internal Server Error', details: err.message });
 });
 
 const PORT = process.env.PORT || 5000;

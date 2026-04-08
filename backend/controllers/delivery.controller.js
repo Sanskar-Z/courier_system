@@ -1,6 +1,6 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
-exports.recordDelivery = async (req, res, next) => {
+export const recordDelivery = async (req, res, next) => {
     try {
         const { shipment_id, courier_id, status, recipient_signature, notes } = req.body;
         

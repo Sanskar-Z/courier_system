@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const deliveryController = require('../controllers/delivery.controller');
-const { authenticate, authorize } = require('../middleware/auth.middleware');
+import * as deliveryController from '../controllers/delivery.controller.js';
+import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
 router.post('/', authenticate, authorize(['admin', 'staff', 'courier']), deliveryController.recordDelivery);
 
-module.exports = router;
+export default router;

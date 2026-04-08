@@ -38,22 +38,22 @@ export default function BookShipment() {
                         <h3 className="font-semibold text-gray-700">Sender Information</h3>
                         <div>
                             <label className="block text-sm text-gray-600 mb-1">Sender Name</label>
-                            <input type="text" name="sender_name" className="w-full border p-2 rounded" onChange={handleChange} required />
+                            <input type="text" name="sender_name" className="w-full border p-2 rounded" value={formData.sender_name} onChange={handleChange} required />
                         </div>
                         <div>
                             <label className="block text-sm text-gray-600 mb-1">Sender Address</label>
-                            <textarea name="sender_address" className="w-full border p-2 rounded" onChange={handleChange} required></textarea>
+                            <textarea name="sender_address" className="w-full border p-2 rounded" value={formData.sender_address} onChange={handleChange} required></textarea>
                         </div>
                     </div>
                     <div className="space-y-4">
                         <h3 className="font-semibold text-gray-700">Receiver Information</h3>
                         <div>
                             <label className="block text-sm text-gray-600 mb-1">Receiver Name</label>
-                            <input type="text" name="receiver_name" className="w-full border p-2 rounded" onChange={handleChange} required />
+                            <input type="text" name="receiver_name" className="w-full border p-2 rounded" value={formData.receiver_name} onChange={handleChange} required />
                         </div>
                         <div>
                             <label className="block text-sm text-gray-600 mb-1">Receiver Address</label>
-                            <textarea name="receiver_address" className="w-full border p-2 rounded" onChange={handleChange} required></textarea>
+                            <textarea name="receiver_address" className="w-full border p-2 rounded" value={formData.receiver_address} onChange={handleChange} required></textarea>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@ export default function BookShipment() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm text-gray-600 mb-1">Weight (kg)</label>
-                        <input type="number" step="0.01" name="weight" className="w-full border p-2 rounded" onChange={handleChange} required />
+                        <input type="number" step="0.01" name="weight" className="w-full border p-2 rounded" value={formData.weight} onChange={handleChange} required />
                     </div>
                     <div>
                         <label className="block text-sm text-gray-600 mb-1">Service Level</label>

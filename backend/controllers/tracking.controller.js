@@ -1,6 +1,6 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
-exports.getTrackingHistory = async (req, res, next) => {
+export const getTrackingHistory = async (req, res, next) => {
     try {
         const { tracking_no } = req.params;
         const [shipments] = await db.query('SELECT * FROM shipments WHERE tracking_no = ?', [tracking_no]);
@@ -26,7 +26,7 @@ exports.getTrackingHistory = async (req, res, next) => {
     }
 };
 
-exports.addEvent = async (req, res, next) => {
+export const addEvent = async (req, res, next) => {
     try {
         const { shipment_id, status, location, description } = req.body;
         
@@ -39,7 +39,7 @@ exports.addEvent = async (req, res, next) => {
     }
 };
 
-exports.reportDelay = async (req, res, next) => {
+export const reportDelay = async (req, res, next) => {
     try {
         const { shipment_id, reason } = req.body;
         await db.query('CALL sp_calculate_delay(?, ?)', [shipment_id, reason]);

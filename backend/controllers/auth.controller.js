@@ -1,8 +1,8 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const db = require('../config/db');
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import db from '../config/db.js';
 
-exports.register = async (req, res, next) => {
+export const register = async (req, res, next) => {
     try {
         // Ignored role from req.body to prevent privilege escalation
         const { username, password, full_name, phone, email, address } = req.body;
@@ -34,7 +34,7 @@ exports.register = async (req, res, next) => {
     }
 };
 
-exports.login = async (req, res, next) => {
+export const login = async (req, res, next) => {
     try {
         const { username, password } = req.body;
         const [users] = await db.query('SELECT * FROM users WHERE username = ?', [username]);

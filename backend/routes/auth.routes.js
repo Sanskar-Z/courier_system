@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const authController = require('../controllers/auth.controller');
-const validate = require('../middleware/validate.middleware');
-const Joi = require('joi');
+import * as authController from '../controllers/auth.controller.js';
+import validate from '../middleware/validate.middleware.js';
+import Joi from 'joi';
 
 const registerSchema = Joi.object({
     username: Joi.string().alphanum().min(3).max(30).required(),
@@ -21,4 +21,4 @@ const loginSchema = Joi.object({
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
 
-module.exports = router;
+export default router;

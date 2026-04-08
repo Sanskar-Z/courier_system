@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const db = require('../config/db');
-const { authenticate, authorize } = require('../middleware/auth.middleware');
+import db from '../config/db.js';
+import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
 router.get('/', authenticate, authorize(['admin', 'staff']), async (req, res, next) => {
     try {
@@ -22,4 +22,4 @@ router.post('/', authenticate, authorize(['admin']), async (req, res, next) => {
     }
 });
 
-module.exports = router;
+export default router;

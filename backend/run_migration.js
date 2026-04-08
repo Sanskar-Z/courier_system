@@ -1,6 +1,6 @@
-const fs = require('fs');
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+import fs from 'fs';
+import mysql from 'mysql2/promise';
+import 'dotenv/config';
 
 async function runMigration() {
     const pool = mysql.createPool({

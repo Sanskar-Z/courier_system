@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from 'joi';
 
 const validate = (schema) => (req, res, next) => {
     const { error } = schema.validate(req.body, { abortEarly: false });
@@ -11,4 +11,4 @@ const validate = (schema) => (req, res, next) => {
     next();
 };
 
-module.exports = validate;
+export default validate;
