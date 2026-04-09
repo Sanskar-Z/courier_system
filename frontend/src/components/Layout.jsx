@@ -4,18 +4,15 @@ import {
   Package,
   Home,
   BarChart3,
-  Truck,
   MapPin,
-  Users,
   FileText,
-  Settings,
   LogOut,
   Menu,
   X
 } from 'lucide-react';
 
 export default function Layout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const role = localStorage.getItem('role');
@@ -38,89 +35,96 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        </div>
-      )}
-
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
-        <div className="flex flex-col h-full">
+      {/* Navbar */}
+      <nav className="border-b border-slate-200 bg-white/90 backdrop-blur-xl shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <Link to="/" className="flex items-center space-x-2">
-              <Package className="h-8 w-8 text-blue-600" />
-              <span className="font-bold text-xl text-gray-900">SwiftTrack</span>
-            </Link>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-500"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
+          <Link to="/" className="flex items-center gap-3 text-slate-900">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-sm">
+              <Package className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-lg font-semibold">SwiftTrack</p>
+              <p className="text-xs text-slate-500">Logistics SaaS</p>
+            </div>
+          </Link>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
-            {filteredNavigation.map((item) => {
+          {/* Desktop navigation */}
+          <div className="hidden lg:flex items-center gap-2">
+            {filteredNavigation.map(item => {
               const isActive = location.pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-150 ${
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-600 hover:bg-slate-100'
                   }`}
-                  onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
+                  <item.icon className="h-4 w-4" />
                   {item.name}
                 </Link>
               );
             })}
-          </nav>
 
-          {/* User section */}
-          <div className="border-t border-gray-200 p-4">
+            {/* Logout button */}
             <button
               onClick={handleLogout}
-              className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
             >
-              <LogOut className="mr-3 h-5 w-5" />
-              Logout
+              <LogOut className="h-4 w-4" /> Logout
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
-        {/* Top bar */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 lg:hidden">
-          <div className="flex items-center justify-between h-16 px-4">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-            <Link to="/" className="flex items-center space-x-2">
-              <Package className="h-6 w-6 text-blue-600" />
-              <span className="font-semibold text-gray-900">SwiftTrack</span>
-            </Link>
-            <div className="w-10" /> {/* Spacer */}
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="lg:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition hover:bg-slate-50"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="lg:hidden border-t border-slate-200 bg-white/90 backdrop-blur-xl shadow-sm">
+            <div className="flex flex-col p-4 space-y-2">
+              {filteredNavigation.map(item => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                      isActive
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              >
+                <LogOut className="h-4 w-4" /> Logout
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+      </nav>
 
-        {/* Page content */}
-        <main className="flex-1 p-6">
-          <Outlet />
-        </main>
-      </div>
+      {/* Page content */}
+      <main className="p-6">
+        <Outlet />
+      </main>
     </div>
   );
 }
