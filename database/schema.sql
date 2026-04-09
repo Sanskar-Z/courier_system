@@ -126,7 +126,22 @@ CREATE TABLE delay_logs (
     FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE
 );
 
--- 12. audit_logs
+-- 12. shipment_hubs
+CREATE TABLE shipment_hubs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    shipment_id INT NOT NULL,
+    hub_id INT NOT NULL,
+    visit_id INT NOT NULL DEFAULT 1,
+    arrival_time DATETIME,
+    departure_time DATETIME,
+    status ENUM('Arrived', 'Departed', 'Processing') DEFAULT 'Processing',
+    notes TEXT,
+    FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE,
+    FOREIGN KEY (hub_id) REFERENCES hubs(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_shipment_hub_visit (shipment_id, hub_id, visit_id)
+);
+
+-- 13. audit_logs
 CREATE TABLE audit_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -137,21 +152,35 @@ CREATE TABLE audit_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- 13. shipment_hubs
-CREATE TABLE shipment_hubs (
+-- 14. delivery_failures (for retry system)
+CREATE TABLE delivery_failures (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     shipment_id INT NOT NULL,
-    hub_id INT NOT NULL,
-    arrival_time DATETIME,
-    departure_time DATETIME,
-    PRIMARY KEY (shipment_id, hub_id),
+    attempt_number INT NOT NULL DEFAULT 1,
+    failure_reason TEXT NOT NULL,
+    retry_scheduled DATETIME,
+    resolved BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE
+);
+
+-- 15. damage_logs (for damage logging)
+CREATE TABLE damage_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    shipment_id INT NOT NULL,
+    damage_description TEXT NOT NULL,
+    reported_by INT,  -- user_id
+    reported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE,
-    FOREIGN KEY (hub_id) REFERENCES hubs(id) ON DELETE CASCADE
+    FOREIGN KEY (reported_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- INDEXES
 CREATE INDEX idx_tracking_no ON shipments(tracking_no);
 CREATE INDEX idx_shipment_customer ON shipments(customer_id);
 CREATE INDEX idx_events_shipment ON tracking_events(shipment_id);
+
+-- CHECK CONSTRAINTS
+ALTER TABLE shipments ADD CONSTRAINT chk_weight CHECK (weight > 0);
 
 -- --------------------------------------------------------------------------------------
 -- STORED PROCEDURES
@@ -313,3 +342,106 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- --------------------------------------------------------------------------------------
+-- VIEWS
+-- --------------------------------------------------------------------------------------
+
+-- View 1: shipment_tracking_view
+CREATE VIEW shipment_tracking_view AS
+SELECT 
+    s.id AS shipment_id,
+    s.tracking_no,
+    s.sender_name,
+    s.receiver_name,
+    s.weight,
+    s.service_type,
+    s.expected_delivery_date,
+    s.is_sla_breached,
+    ss.current_state,
+    te.event_time AS last_event_time,
+    te.location AS last_location,
+    te.description AS last_description
+FROM shipments s
+LEFT JOIN shipment_status ss ON s.id = ss.shipment_id
+LEFT JOIN tracking_events te ON s.id = te.shipment_id 
+    AND te.event_time = (SELECT MAX(event_time) FROM tracking_events WHERE shipment_id = s.id);
+
+-- View 2: sla_report_view
+CREATE VIEW sla_report_view AS
+SELECT 
+    service_type,
+    COUNT(*) AS total_shipments,
+    SUM(CASE WHEN is_sla_breached = TRUE THEN 1 ELSE 0 END) AS breached_count,
+    ROUND((SUM(CASE WHEN is_sla_breached = TRUE THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) AS breach_percentage
+FROM shipments
+GROUP BY service_type;
+
+-- --------------------------------------------------------------------------------------
+-- STORED FUNCTIONS
+-- --------------------------------------------------------------------------------------
+
+DELIMITER //
+
+-- Function 1: fn_sla_status(shipment_id)
+CREATE FUNCTION fn_sla_status(p_shipment_id INT)
+RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN
+    DECLARE v_expected DATETIME;
+    DECLARE v_actual DATETIME;
+    DECLARE v_status VARCHAR(20);
+    
+    SELECT expected_delivery_date INTO v_expected FROM shipments WHERE id = p_shipment_id;
+    SELECT delivery_time INTO v_actual FROM deliveries WHERE shipment_id = p_shipment_id LIMIT 1;
+    
+    IF v_actual IS NULL THEN
+        SET v_status = 'Pending';
+    ELSEIF v_actual <= v_expected THEN
+        SET v_status = 'Met';
+    ELSE
+        SET v_status = 'Breached';
+    END IF;
+    
+    RETURN v_status;
+END //
+
+-- Function 2: fn_delay_duration(shipment_id)
+CREATE FUNCTION fn_delay_duration(p_shipment_id INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE v_expected DATETIME;
+    DECLARE v_actual DATETIME;
+    DECLARE v_delay INT DEFAULT 0;
+    
+    SELECT expected_delivery_date INTO v_expected FROM shipments WHERE id = p_shipment_id;
+    SELECT delivery_time INTO v_actual FROM deliveries WHERE shipment_id = p_shipment_id LIMIT 1;
+    
+    IF v_actual IS NOT NULL AND v_actual > v_expected THEN
+        SET v_delay = TIMESTAMPDIFF(HOUR, v_expected, v_actual);
+    END IF;
+    
+    RETURN v_delay;
+END //
+
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------------
+-- ADVANCED QUERIES EXAMPLES
+-- --------------------------------------------------------------------------------------
+
+-- RIGHT JOIN example: Find all hubs and shipments that visited them (even if no shipments)
+-- SELECT h.name AS hub_name, s.tracking_no FROM hubs h RIGHT JOIN shipment_hubs sh ON h.id = sh.hub_id LEFT JOIN shipments s ON sh.shipment_id = s.id;
+
+-- FULL OUTER JOIN simulation: All shipments and deliveries (even unmatched)
+-- SELECT s.tracking_no, d.status FROM shipments s LEFT JOIN deliveries d ON s.id = d.shipment_id UNION SELECT s.tracking_no, d.status FROM shipments s RIGHT JOIN deliveries d ON s.id = d.shipment_id;
+
+-- SELF JOIN: Employee hierarchy (assuming employees have manager_id)
+-- SELECT e1.name AS employee, e2.name AS manager FROM employees e1 LEFT JOIN employees e2 ON e1.manager_id = e2.id;
+
+-- NON-EQUI JOIN: Shipments where delivery time > expected time
+-- SELECT s.tracking_no FROM shipments s JOIN deliveries d ON s.id = d.shipment_id AND d.delivery_time > s.expected_delivery_date;
+
+-- GROUP BY + HAVING: Service types with more than 5 shipments and SLA breach rate > 10%
+-- SELECT service_type, COUNT(*) AS total, SUM(CASE WHEN is_sla_breached THEN 1 ELSE 0 END) AS breaches FROM shipments GROUP BY service_type HAVING COUNT(*) > 5 AND (SUM(CASE WHEN is_sla_breached THEN 1 ELSE 0 END) / COUNT(*)) > 0.1;

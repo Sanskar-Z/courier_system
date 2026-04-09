@@ -94,16 +94,22 @@ export const createShipment = async (req, res, next) => {
 
 export const getShipments = async (req, res, next) => {
     try {
+        const { page = 1, limit = 10 } = req.query;
+        const offset = (page - 1) * limit;
         let query = 'SELECT s.*, c.full_name as customer_name, cou.name as courier_name FROM shipments s JOIN customers c ON s.customer_id = c.id LEFT JOIN couriers cou ON s.courier_id = cou.id';
         let params = [];
+        let customerId = null;
         
         if (req.user.role === 'customer') {
             const [cust] = await db.query('SELECT id FROM customers WHERE user_id = ?', [req.user.id]);
+            if (cust.length === 0) return res.status(403).json({ error: 'Customer profile not found' });
+            customerId = cust[0].id;
             query += ' WHERE s.customer_id = ?';
-            params.push(cust[0].id);
+            params.push(customerId);
         }
         
-        query += ' ORDER BY s.created_at DESC';
+        query += ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?';
+        params.push(limit, offset);
         const [shipments] = await db.query(query, params);
         
         // Also fetch status for each
@@ -115,7 +121,8 @@ export const getShipments = async (req, res, next) => {
             s.current_status = statusMap[s.id] || 'Booked';
         });
 
-        res.json(shipments);
+        const [total] = await db.query('SELECT COUNT(*) AS count FROM shipments' + (req.user.role === 'customer' ? ' WHERE customer_id = ?' : ''), req.user.role === 'customer' ? [customerId] : []);
+        res.json({ shipments, total: total[0].count, page: parseInt(page), limit: parseInt(limit) });
     } catch (err) {
         next(err);
     }

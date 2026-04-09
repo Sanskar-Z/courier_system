@@ -1,13 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ClipboardList, Truck, MapPin, ShieldCheck, Users, Activity } from 'lucide-react';
 import axios from '../api/axios';
 
 export default function StaffDashboard() {
+    const role = localStorage.getItem('role');
     const [activeTab, setActiveTab] = useState('events');
     const [formData, setFormData] = useState({});
     const [statusMsg, setStatusMsg] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const role = localStorage.getItem('role');
+    const [couriers, setCouriers] = useState([]);
+    const [couriersLoading, setCouriersLoading] = useState(false);
+    const [couriersError, setCouriersError] = useState('');
+
+    const availableTabs = useMemo(() => (
+        role === 'admin'
+            ? ['events', 'delay', 'delivery', 'hub', 'courier', 'assign']
+            : ['events', 'delay', 'delivery', 'assign']
+    ), [role]);
+
+    const loadCouriers = async () => {
+        setCouriersLoading(true);
+        setCouriersError('');
+        try {
+            const response = await axios.get('/couriers');
+            setCouriers(response.data);
+        } catch {
+            setCouriersError('Unable to load courier list.');
+        } finally {
+            setCouriersLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (role !== 'customer') {
+            loadCouriers();
+        }
+    }, [role]);
+
+    useEffect(() => {
+        if (!availableTabs.includes(activeTab)) {
+            setActiveTab('events');
+        }
+    }, [activeTab, availableTabs]);
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -20,6 +54,9 @@ export default function StaffDashboard() {
             await method(endpoint, formData);
             setStatusMsg('Action completed successfully!');
             setFormData({});
+            if (activeTab === 'courier') {
+                loadCouriers();
+            }
         } catch (err) {
             setStatusMsg(err.response?.data?.error || 'Action failed');
         } finally {
@@ -68,7 +105,7 @@ export default function StaffDashboard() {
                         <p className="mt-1 text-gray-600">Pick the workflow you need and complete operational updates in one place.</p>
                     </div>
                     <div className="flex flex-wrap gap-3">
-                        {['events', 'delay', 'delivery', 'hub', 'courier', 'assign'].map((tab) => (
+                        {availableTabs.map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -78,6 +115,11 @@ export default function StaffDashboard() {
                             </button>
                         ))}
                     </div>
+                </div>
+
+                <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                    <p className="font-semibold text-slate-900">Need a record ID?</p>
+                    <p className="mt-2">Use the courier list below for courier IDs, and open Dashboard for shipment IDs. If you just created a courier, the new courier will appear in the list so you can copy its ID immediately.</p>
                 </div>
 
                 {statusMsg && (
@@ -182,6 +224,33 @@ export default function StaffDashboard() {
                                 </div>
                             </div>
                             <p className="mt-4 text-slate-600">Maintain consistent courier assignments, route updates, and delivery reporting without leaving the dashboard.</p>
+                        </div>
+                        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+                            <div className="flex items-center gap-3">
+                                <Truck className="h-6 w-6 text-green-600" />
+                                <div>
+                                    <p className="text-sm text-slate-500">Courier IDs</p>
+                                    <p className="mt-2 text-lg font-semibold text-slate-900">Available couriers</p>
+                                </div>
+                            </div>
+                            <div className="mt-4 text-sm text-slate-600">
+                                {couriersLoading ? (
+                                    <p>Loading courier list...</p>
+                                ) : couriersError ? (
+                                    <p>{couriersError}</p>
+                                ) : couriers.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {couriers.map((courier) => (
+                                            <div key={courier.id} className="rounded-2xl bg-slate-100 px-3 py-2">
+                                                <p className="font-medium text-slate-800">ID: {courier.id}</p>
+                                                <p className="text-slate-500">{courier.name} · {courier.vehicle_type || 'No vehicle type'}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p>No couriers found yet. Add one using the Add Courier tab.</p>
+                                )}
+                            </div>
                         </div>
                         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                             <div className="flex items-center gap-3">

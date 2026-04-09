@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
   Package,
@@ -12,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function Layout() {
-  const [menuOpen, setMenuOpen] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const role = localStorage.getItem('role');
@@ -35,21 +34,30 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
+
       <nav className="border-b border-slate-200 bg-white/90 backdrop-blur-xl shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 text-slate-900">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-sm">
-              <Package className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-lg font-semibold">SwiftTrack</p>
-              <p className="text-xs text-slate-500">Logistics SaaS</p>
-            </div>
-          </Link>
+          <div className="flex items-center gap-3 text-slate-900">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm">
+                <Package className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-lg font-semibold">SwiftTrack</p>
+                <p className="text-xs text-slate-500">Logistics</p>
+              </div>
+            </Link>
 
-          {/* Desktop navigation */}
+            {/* User role display */}
+            {role && (
+              <span className="ml-4 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                {role.charAt(0).toUpperCase() + role.slice(1)}
+              </span>
+            )}
+          </div>
+
+
           <div className="hidden lg:flex items-center gap-2">
             {filteredNavigation.map(item => {
               const isActive = location.pathname === item.href;
@@ -57,11 +65,10 @@ export default function Layout() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                    isActive
-                      ? 'bg-slate-900 text-white'
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${isActive
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                    }`}
                 >
                   <item.icon className="h-4 w-4" />
                   {item.name}
@@ -77,48 +84,8 @@ export default function Layout() {
               <LogOut className="h-4 w-4" /> Logout
             </button>
           </div>
-
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden rounded-full border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition hover:bg-slate-50"
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
 
-        {/* Mobile menu */}
-        {menuOpen && (
-          <div className="lg:hidden border-t border-slate-200 bg-white/90 backdrop-blur-xl shadow-sm">
-            <div className="flex flex-col p-4 space-y-2">
-              {filteredNavigation.map(item => {
-                const isActive = location.pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
-                      isActive
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.name}
-                  </Link>
-                );
-              })}
-
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-              >
-                <LogOut className="h-4 w-4" /> Logout
-              </button>
-            </div>
-          </div>
-        )}
       </nav>
 
       {/* Page content */}

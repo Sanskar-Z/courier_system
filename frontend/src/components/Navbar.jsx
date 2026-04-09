@@ -18,16 +18,15 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 text-slate-900">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm">
             <Package className="h-6 w-6" />
           </div>
           <div>
             <p className="text-lg font-semibold">SwiftTrack</p>
-            <p className="text-xs text-slate-500">Logistics SaaS</p>
+            <p className="text-xs text-slate-500">Logistics</p>
           </div>
         </Link>
 
-        {/* Desktop links */}
         <div className="hidden items-center gap-2 lg:flex">
           {token ? (
             <>
@@ -116,13 +115,13 @@ export default function Navbar() {
 
               <Link
                 to="/register"
-                className={`rounded-full px-4 py-2 text-sm font-medium transition  ${
+                className={`flex gap-2 rounded-full px-4 py-2 text-sm font-medium transition  ${
                   location.pathname === '/register'
                     ? 'bg-black text-white'
                     : 'bg-slate-900 text-white hover:bg-slate-800'
                 }`}
               >
-                Register
+                <UserPlus size={19}/>Register
               </Link>
             </>
           )}

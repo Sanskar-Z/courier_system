@@ -187,6 +187,7 @@ export default function Dashboard() {
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking No</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -197,6 +198,7 @@ export default function Dashboard() {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {shipments.slice(0, 10).map(s => (
                                 <tr key={s.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{s.id}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="font-semibold text-blue-600 hover:text-blue-800 cursor-pointer">
                                             {s.tracking_no}
@@ -222,7 +224,7 @@ export default function Dashboard() {
                             ))}
                             {shipments.length === 0 && (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                                         <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                                         <p>No shipments found.</p>
                                         <p className="text-sm">Your shipments will appear here once created.</p>

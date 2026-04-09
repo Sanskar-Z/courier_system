@@ -11,7 +11,8 @@ A complete end-to-end logistics platform ensuring real-world shipment lifecycle 
 
 1. **Database:**
    - Execute `database/schema.sql` in MySQL.
-   - Execute `database/seed.sql` to populate sample users (admin1/password123, customer1/password123), SLAs, and complete shipment lifecycles.
+   - The `database/seed.sql` file has been emptied to avoid loading predefined sample data.
+   - Create admin credentials manually in the database when needed.
 
 2. **Backend:**
    ```bash
