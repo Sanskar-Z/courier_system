@@ -6,6 +6,9 @@ import { Package, AlertTriangle, Clock, TrendingUp, Truck, CheckCircle, XCircle 
 export default function Dashboard() {
     const [shipments, setShipments] = useState([]);
     const [report, setReport] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [slaFilter, setSlaFilter] = useState('');
     const role = localStorage.getItem('role');
 
     useEffect(() => {
@@ -179,9 +182,25 @@ export default function Dashboard() {
 
             {/* Shipments Table */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-gray-900">Recent Shipments</h2>
-                    <p className="text-sm text-gray-600 mt-1">Track and manage your latest shipments</p>
+                <div className="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 className="text-xl font-semibold text-gray-900">Recent Shipments</h2>
+                        <p className="text-sm text-gray-600 mt-1">Track and manage your latest shipments</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-sm">
+                        <input type="text" placeholder="Search tracking..." className="border rounded-md px-3 py-1.5 outline-none focus:ring-1 focus:ring-blue-500" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                        <select className="border rounded-md px-3 py-1.5 outline-none" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                            <option value="">All Statuses</option>
+                            <option value="Booked">Booked</option>
+                            <option value="In Transit">In Transit</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                        <select className="border rounded-md px-3 py-1.5 outline-none" value={slaFilter} onChange={e => setSlaFilter(e.target.value)}>
+                            <option value="">All SLA</option>
+                            <option value="met">SLA Met</option>
+                            <option value="breached">SLA Breached</option>
+                        </select>
+                    </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -196,7 +215,12 @@ export default function Dashboard() {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {shipments.slice(0, 10).map(s => (
+                            {shipments.filter(s => {
+                                const matchSearch = s.tracking_no.toLowerCase().includes(searchTerm.toLowerCase());
+                                const matchStatus = statusFilter ? s.current_status === statusFilter : true;
+                                const matchSLA = slaFilter === 'breached' ? s.is_sla_breached : slaFilter === 'met' ? !s.is_sla_breached : true;
+                                return matchSearch && matchStatus && matchSLA;
+                            }).slice(0, 50).map(s => (
                                 <tr key={s.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{s.id}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">

@@ -61,3 +61,15 @@ export const login = async (req, res, next) => {
         next(err);
     }
 };
+
+export const resetPassword = async (req, res, next) => {
+    try {
+        const { username, new_password } = req.body;
+        const hash = await bcrypt.hash(new_password, 10);
+        const [result] = await db.query('UPDATE users SET password_hash = ? WHERE username = ?', [hash, username]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found' });
+        res.json({ message: 'Password reset successfully' });
+    } catch (err) {
+        next(err);
+    }
+};

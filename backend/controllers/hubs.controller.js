@@ -18,3 +18,14 @@ export const createHub = async (req, res, next) => {
         next(err);
     }
 };
+
+export const updateHub = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, location, capacity } = req.body;
+        await db.query('UPDATE hubs SET name = ?, location = ?, capacity = ? WHERE id = ?', [name, location, capacity, id]);
+        res.json({ message: 'Hub updated successfully' });
+    } catch (err) {
+        next(err);
+    }
+};

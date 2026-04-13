@@ -19,3 +19,15 @@ export const createCourier = async (req, res, next) => {
         next(err);
     }
 };
+
+export const updateCourier = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, vehicle_type, contact_number, status, current_hub_id } = req.body;
+        await db.query('UPDATE couriers SET name = ?, vehicle_type = ?, contact_number = ?, status = ?, current_hub_id = ? WHERE id = ?', 
+        [name, vehicle_type, contact_number, status || 'Active', current_hub_id || null, id]);
+        res.json({ message: 'Courier updated successfully' });
+    } catch (err) {
+        next(err);
+    }
+};

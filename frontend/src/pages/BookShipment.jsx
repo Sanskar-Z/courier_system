@@ -28,6 +28,16 @@ export default function BookShipment() {
         }
     };
 
+    const role = localStorage.getItem('role');
+    if (role !== 'customer') {
+        return (
+            <div className="p-8 text-center text-rose-600 bg-rose-50 rounded-2xl">
+                <h1 className="text-xl font-bold mb-2">Access Restricted</h1>
+                Only customers can book shipments directly. Admin and staff should use the designated dashboard or rely on customer submissions.
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-8">
             <div className="rounded-3xl bg-white shadow-xl border border-gray-200 p-8">

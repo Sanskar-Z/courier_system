@@ -35,3 +35,14 @@ export const createEmployee = async (req, res, next) => {
         next(err);
     }
 };
+
+export const updateEmployee = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { role, hub_id, employee_role } = req.body;
+        await db.query('UPDATE employees SET role = ?, hub_id = ? WHERE id = ?', [employee_role || 'Staff', hub_id || null, id]);
+        res.json({ message: 'Employee updated successfully' });
+    } catch (err) {
+        next(err);
+    }
+};

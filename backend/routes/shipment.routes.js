@@ -17,6 +17,7 @@ const createShipmentSchema = Joi.object({
 
 router.post('/', authenticate, authorize(['admin', 'staff', 'customer']), validate(createShipmentSchema), shipmentController.createShipment);
 router.get('/', authenticate, shipmentController.getShipments);
+router.get('/:id', authenticate, shipmentController.getShipmentById);
 router.get('/report', authenticate, authorize(['admin', 'staff']), shipmentController.getSLAReport);
 router.put('/:id/assign', authenticate, authorize(['admin', 'staff']), shipmentController.assignCourier);
 router.post('/:id/hub', authenticate, authorize(['admin', 'staff']), shipmentController.linkHub);

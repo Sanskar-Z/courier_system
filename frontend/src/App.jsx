@@ -10,6 +10,9 @@ import Tracking from './pages/Tracking';
 import StaffDashboard from './pages/StaffDashboard';
 import ShipmentDetail from './pages/ShipmentDetail';
 import AuditLogs from './pages/AuditLogs';
+import DeliveryFailures from './pages/DeliveryFailures';
+import DamageLogs from './pages/DamageLogs';
+import EmployeeManagement from './pages/EmployeeManagement';
 
 function App() {
   return (
@@ -29,6 +32,9 @@ function App() {
         <Route path="staff" element={<StaffDashboard />} />
         <Route path="shipment/:id" element={<ShipmentDetail />} />
         <Route path="audit-logs" element={<AuditLogs />} />
+        <Route path="delivery-failures" element={<DeliveryFailures />} />
+        <Route path="damage-logs" element={<DamageLogs />} />
+        <Route path="employee-management" element={<EmployeeManagement />} />
       </Route>
     </Routes>
   );

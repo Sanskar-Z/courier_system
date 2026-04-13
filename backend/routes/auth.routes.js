@@ -18,7 +18,13 @@ const loginSchema = Joi.object({
     password: Joi.string().required()
 });
 
+const resetSchema = Joi.object({
+    username: Joi.string().required(),
+    new_password: Joi.string().min(6).required()
+});
+
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
+router.post('/reset-password', validate(resetSchema), authController.resetPassword);
 
 export default router;

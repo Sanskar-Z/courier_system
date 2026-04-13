@@ -7,7 +7,8 @@ import {
   FileText,
   LogOut,
   Menu,
-  X
+  X,
+  Users
 } from 'lucide-react';
 
 export default function Layout() {
@@ -28,6 +29,9 @@ export default function Layout() {
     { name: 'Track Shipment', href: '/track', icon: MapPin, roles: ['customer'] },
     { name: 'Staff Panel', href: '/staff', icon: BarChart3, roles: ['admin', 'staff'] },
     { name: 'Audit Logs', href: '/audit-logs', icon: FileText, roles: ['admin'] },
+    { name: 'Delivery Failures', href: '/delivery-failures', icon: FileText, roles: ['admin', 'staff'] },
+    { name: 'Damage Logs', href: '/damage-logs', icon: FileText, roles: ['admin', 'staff'] },
+    { name: 'Employees', href: '/employee-management', icon: Users, roles: ['admin'] },
   ];
 
   const filteredNavigation = navigation.filter(item => item.roles.includes(role));

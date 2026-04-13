@@ -147,7 +147,7 @@ export default function StaffDashboard() {
                                 {(activeTab === 'events' || activeTab === 'delay' || activeTab === 'delivery') && (
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <input type="number" name="shipment_id" placeholder="Shipment ID" value={formData.shipment_id || ''} onChange={handleChange} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200" required />
-                                        {activeTab !== 'delay' && (
+                                        {activeTab === 'delivery' && (
                                             <input type="number" name="courier_id" placeholder="Courier ID" value={formData.courier_id || ''} onChange={handleChange} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200" required />
                                         )}
                                     </div>

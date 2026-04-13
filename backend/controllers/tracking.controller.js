@@ -1,4 +1,5 @@
 import db from '../config/db.js';
+import { sendEmail } from '../utils/email.js';
 
 export const getTrackingHistory = async (req, res, next) => {
     try {
@@ -39,10 +40,28 @@ export const addEvent = async (req, res, next) => {
     }
 };
 
+export const getEventsByShipmentId = async (req, res, next) => {
+    try {
+        const { shipment_id } = req.query;
+        if (!shipment_id) return res.status(400).json({ error: 'shipment_id is required' });
+        
+        const [events] = await db.query('SELECT * FROM tracking_events WHERE shipment_id = ? ORDER BY event_time DESC', [shipment_id]);
+        res.json(events);
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const reportDelay = async (req, res, next) => {
     try {
         const { shipment_id, reason } = req.body;
         await db.query('CALL sp_calculate_delay(?, ?)', [shipment_id, reason]);
+
+        const [emailData] = await db.query('SELECT c.email, s.tracking_no FROM shipments s JOIN customers c ON s.customer_id = c.id WHERE s.id = ?', [shipment_id]);
+        if (emailData.length > 0) {
+            await sendEmail(emailData[0].email, 'Delay Detected', `Your shipment ${emailData[0].tracking_no} has a reported delay: ${reason}. SLA dates have been adjusted.`);
+        }
+
         res.status(201).json({ message: 'Delay reported, SLA dates updated' });
     } catch (err) {
         next(err);
