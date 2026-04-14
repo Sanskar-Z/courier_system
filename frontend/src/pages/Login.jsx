@@ -30,7 +30,7 @@ export default function Login() {
     return (
         <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                {/* Header */}
+
                 <div className="text-center">
                     <Link to="/" className="inline-flex items-center space-x-2 mb-8">
                         <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
@@ -45,7 +45,6 @@ export default function Login() {
                     <p className="text-gray-600">Sign in to your account to continue</p>
                 </div>
 
-                {/* Login Form */}
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
@@ -117,13 +116,6 @@ export default function Login() {
                                 Sign up
                             </Link>
                         </p>
-                    </div>
-
-                    {/* Demo credentials */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-xs font-medium text-gray-700 mb-2">Demo Credentials:</p>
-                        <p className="text-xs text-gray-600">Username: <span className="font-mono">admin1</span></p>
-                        <p className="text-xs text-gray-600">Password: <span className="font-mono">password123</span></p>
                     </div>
                 </div>
             </div>

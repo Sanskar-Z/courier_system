@@ -31,7 +31,7 @@ export default function Register() {
     return (
         <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
             <div className="max-w-2xl w-full space-y-8">
-                {/* Header */}
+
                 <div className="text-center">
                     <Link to="/" className="inline-flex items-center space-x-2 mb-8">
                         <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
@@ -46,7 +46,6 @@ export default function Register() {
                     <p className="text-gray-600">Join thousands of businesses using SwiftTrack</p>
                 </div>
 
-                {/* Registration Form */}
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">

@@ -2,13 +2,10 @@ import db from '../config/db.js';
 
 export const getAdvancedReports = async (req, res, next) => {
     try {
-        // SLA report using view
         const [slaReport] = await db.query('SELECT * FROM sla_report_view');
-        
-        // Shipment tracking using view
+
         const [tracking] = await db.query('SELECT * FROM shipment_tracking_view LIMIT 50');
-        
-        // Advanced search example
+
         const { tracking_no, status, date_from, date_to } = req.query;
         let query = 'SELECT * FROM shipments WHERE 1=1';
         let params = [];
@@ -29,7 +26,7 @@ export const getAdvancedReports = async (req, res, next) => {
             params.push(date_to);
         }
         const [searchResults] = await db.query(query, params);
-        
+
         res.json({ slaReport, tracking, searchResults });
     } catch (err) {
         next(err);

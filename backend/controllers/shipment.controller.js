@@ -78,12 +78,12 @@ export const createShipment = async (req, res, next) => {
             const [result] = await db.query('CALL sp_create_shipment(?, ?, ?, ?, ?, ?, ?, @p_shipment_id, @p_tracking_no)',
                 [customer_id, sender_name, sender_address, receiver_name, receiver_address, weight, canonicalServiceType]);
             const [[{ p_shipment_id, p_tracking_no }]] = await db.query('SELECT @p_shipment_id AS p_shipment_id, @p_tracking_no AS p_tracking_no');
-            
+
             const [custData] = await db.query('SELECT email FROM customers WHERE id = ?', [customer_id]);
             if (custData.length > 0) {
                 await sendEmail(custData[0].email, 'Shipment Booked', `Your shipment ${p_tracking_no} has been successfully booked.`);
             }
-            
+
             return res.status(201).json({ message: 'Shipment created successfully', shipment_id: p_shipment_id, tracking_no: p_tracking_no });
         } catch (err) {
             if (err.code === 'ER_SP_DOES_NOT_EXIST' || err.message.includes('does not exist') || err.message.includes('Invalid Service Type')) {
@@ -108,7 +108,7 @@ export const getShipments = async (req, res, next) => {
         let query = 'SELECT s.*, c.full_name as customer_name, cou.name as courier_name FROM shipments s JOIN customers c ON s.customer_id = c.id LEFT JOIN couriers cou ON s.courier_id = cou.id';
         let params = [];
         let customerId = null;
-        
+
         if (req.user.role === 'customer') {
             const [cust] = await db.query('SELECT id FROM customers WHERE user_id = ?', [req.user.id]);
             if (cust.length === 0) return res.status(403).json({ error: 'Customer profile not found' });
@@ -116,16 +116,15 @@ export const getShipments = async (req, res, next) => {
             query += ' WHERE s.customer_id = ?';
             params.push(customerId);
         }
-        
+
         query += ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?';
         params.push(limit, offset);
         const [shipments] = await db.query(query, params);
-        
-        // Also fetch status for each
+
         const [statuses] = await db.query('SELECT * FROM shipment_status');
         const statusMap = {};
         statuses.forEach(s => statusMap[s.shipment_id] = s.current_state);
-        
+
         shipments.forEach(s => {
             s.current_status = statusMap[s.id] || 'Booked';
         });
@@ -142,11 +141,11 @@ export const getShipmentById = async (req, res, next) => {
         const { id } = req.params;
         const query = 'SELECT s.*, c.full_name as customer_name, cou.name as courier_name FROM shipments s JOIN customers c ON s.customer_id = c.id LEFT JOIN couriers cou ON s.courier_id = cou.id WHERE s.id = ?';
         const [shipments] = await db.query(query, [id]);
-        
+
         if (shipments.length === 0) {
             return res.status(404).json({ error: 'Shipment not found' });
         }
-        
+
         const shipment = shipments[0];
 
         if (req.user.role === 'customer') {
@@ -155,7 +154,7 @@ export const getShipmentById = async (req, res, next) => {
                 return res.status(403).json({ error: 'Access denied to this shipment' });
             }
         }
-        
+
         const [statusRows] = await db.query('SELECT * FROM shipment_status WHERE shipment_id = ? ORDER BY updated_at DESC LIMIT 1', [id]);
         shipment.current_status = statusRows.length > 0 ? statusRows[0].current_state : 'Booked';
 
@@ -169,9 +168,9 @@ export const assignCourier = async (req, res, next) => {
     try {
         const { courier_id } = req.body;
         const { id } = req.params;
-        
+
         await db.query('UPDATE shipments SET courier_id = ? WHERE id = ?', [courier_id, id]);
-        
+
         res.json({ message: 'Courier assigned successfully' });
     } catch (err) {
         next(err);
@@ -184,8 +183,8 @@ export const getSLAReport = async (req, res, next) => {
         const [total] = await db.query('SELECT count(*) as total_shipments FROM shipments');
         const [delayed] = await db.query('SELECT count(distinct shipment_id) as delayed FROM delay_logs');
         const [byService] = await db.query('SELECT service_type, count(*) as count FROM shipments GROUP BY service_type');
-        
-        res.json({ 
+
+        res.json({
             total_shipments: total[0].total_shipments,
             sla_breaches: breaches[0].total_breaches,
             delayed_shipments: delayed[0].delayed,
@@ -200,10 +199,10 @@ export const linkHub = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { hub_id } = req.body;
-        
+
         // Log arrival at hub
         await db.query('INSERT INTO shipment_hubs (shipment_id, hub_id, arrival_time) VALUES (?, ?, NOW())', [id, hub_id]);
-        
+
         res.json({ message: 'Shipment linked to hub successfully' });
     } catch (err) {
         next(err);

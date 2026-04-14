@@ -426,22 +426,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
--- --------------------------------------------------------------------------------------
--- ADVANCED QUERIES EXAMPLES
--- --------------------------------------------------------------------------------------
-
--- RIGHT JOIN example: Find all hubs and shipments that visited them (even if no shipments)
--- SELECT h.name AS hub_name, s.tracking_no FROM hubs h RIGHT JOIN shipment_hubs sh ON h.id = sh.hub_id LEFT JOIN shipments s ON sh.shipment_id = s.id;
-
--- FULL OUTER JOIN simulation: All shipments and deliveries (even unmatched)
--- SELECT s.tracking_no, d.status FROM shipments s LEFT JOIN deliveries d ON s.id = d.shipment_id UNION SELECT s.tracking_no, d.status FROM shipments s RIGHT JOIN deliveries d ON s.id = d.shipment_id;
-
--- SELF JOIN: Employee hierarchy (assuming employees have manager_id)
--- SELECT e1.name AS employee, e2.name AS manager FROM employees e1 LEFT JOIN employees e2 ON e1.manager_id = e2.id;
-
--- NON-EQUI JOIN: Shipments where delivery time > expected time
--- SELECT s.tracking_no FROM shipments s JOIN deliveries d ON s.id = d.shipment_id AND d.delivery_time > s.expected_delivery_date;
-
--- GROUP BY + HAVING: Service types with more than 5 shipments and SLA breach rate > 10%
--- SELECT service_type, COUNT(*) AS total, SUM(CASE WHEN is_sla_breached THEN 1 ELSE 0 END) AS breaches FROM shipments GROUP BY service_type HAVING COUNT(*) > 5 AND (SUM(CASE WHEN is_sla_breached THEN 1 ELSE 0 END) / COUNT(*)) > 0.1;
