@@ -105,7 +105,7 @@ export const getShipments = async (req, res, next) => {
     try {
         const { page = 1, limit = 10 } = req.query;
         const offset = (page - 1) * limit;
-        let query = 'SELECT s.*, c.full_name as customer_name, cou.name as courier_name FROM shipments s JOIN customers c ON s.customer_id = c.id LEFT JOIN couriers cou ON s.courier_id = cou.id';
+        let query = 'SELECT s.*, c.full_name as customer_name, cou.name as courier_name FROM shipments s JOIN customers c ON s.customer_id = c.id LEFT JOIN couriers cou ON s.courier_id = cou.id WHERE s.is_deleted = FALSE';
         let params = [];
         let customerId = null;
 
@@ -113,7 +113,7 @@ export const getShipments = async (req, res, next) => {
             const [cust] = await db.query('SELECT id FROM customers WHERE user_id = ?', [req.user.id]);
             if (cust.length === 0) return res.status(403).json({ error: 'Customer profile not found' });
             customerId = cust[0].id;
-            query += ' WHERE s.customer_id = ?';
+            query += ' AND s.customer_id = ?';
             params.push(customerId);
         }
 
@@ -129,7 +129,7 @@ export const getShipments = async (req, res, next) => {
             s.current_status = statusMap[s.id] || 'Booked';
         });
 
-        const [total] = await db.query('SELECT COUNT(*) AS count FROM shipments' + (req.user.role === 'customer' ? ' WHERE customer_id = ?' : ''), req.user.role === 'customer' ? [customerId] : []);
+        const [total] = await db.query('SELECT COUNT(*) AS count FROM shipments WHERE is_deleted = FALSE' + (req.user.role === 'customer' ? ' AND customer_id = ?' : ''), req.user.role === 'customer' ? [customerId] : []);
         res.json({ shipments, total: total[0].count, page: parseInt(page), limit: parseInt(limit) });
     } catch (err) {
         next(err);
@@ -139,7 +139,7 @@ export const getShipments = async (req, res, next) => {
 export const getShipmentById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const query = 'SELECT s.*, c.full_name as customer_name, cou.name as courier_name FROM shipments s JOIN customers c ON s.customer_id = c.id LEFT JOIN couriers cou ON s.courier_id = cou.id WHERE s.id = ?';
+        const query = 'SELECT s.*, c.full_name as customer_name, cou.name as courier_name FROM shipments s JOIN customers c ON s.customer_id = c.id LEFT JOIN couriers cou ON s.courier_id = cou.id WHERE s.id = ? AND s.is_deleted = FALSE';
         const [shipments] = await db.query(query, [id]);
 
         if (shipments.length === 0) {
@@ -179,10 +179,10 @@ export const assignCourier = async (req, res, next) => {
 
 export const getSLAReport = async (req, res, next) => {
     try {
-        const [breaches] = await db.query('SELECT count(*) as total_breaches FROM shipments WHERE is_sla_breached = TRUE');
-        const [total] = await db.query('SELECT count(*) as total_shipments FROM shipments');
-        const [delayed] = await db.query('SELECT count(distinct shipment_id) as delayed FROM delay_logs');
-        const [byService] = await db.query('SELECT service_type, count(*) as count FROM shipments GROUP BY service_type');
+        const [breaches] = await db.query('SELECT count(*) as total_breaches FROM shipments WHERE is_sla_breached = TRUE AND is_deleted = FALSE');
+        const [total] = await db.query('SELECT count(*) as total_shipments FROM shipments WHERE is_deleted = FALSE');
+        const [delayed] = await db.query('SELECT count(distinct d.shipment_id) as delayed FROM delay_logs d JOIN shipments s ON d.shipment_id = s.id WHERE s.is_deleted = FALSE');
+        const [byService] = await db.query('SELECT service_type, count(*) as count FROM shipments WHERE is_deleted = FALSE GROUP BY service_type');
 
         res.json({
             total_shipments: total[0].total_shipments,
@@ -204,6 +204,25 @@ export const linkHub = async (req, res, next) => {
         await db.query('INSERT INTO shipment_hubs (shipment_id, hub_id, arrival_time) VALUES (?, ?, NOW())', [id, hub_id]);
 
         res.json({ message: 'Shipment linked to hub successfully' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteShipment = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await db.query('UPDATE shipments SET is_deleted = TRUE WHERE id = ?', [id]);
+        
+        // Log to audit_logs
+        await db.query('INSERT INTO audit_logs (user_id, action, table_name, record_id) VALUES (?, ?, ?, ?)', [
+            req.user ? req.user.id : null,
+            'DELETE_SHIPMENT',
+            'shipments',
+            id
+        ]);
+        
+        res.json({ message: 'Shipment deleted successfully (soft delete)' });
     } catch (err) {
         next(err);
     }

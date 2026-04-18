@@ -77,6 +77,7 @@ CREATE TABLE shipments (
     base_charge DECIMAL(10,2) DEFAULT 0,
     expected_delivery_date DATETIME,
     is_sla_breached BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,

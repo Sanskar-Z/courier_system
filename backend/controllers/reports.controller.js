@@ -32,3 +32,19 @@ export const getAdvancedReports = async (req, res, next) => {
         next(err);
     }
 };
+
+export const getTopCouriers = async (req, res, next) => {
+    try {
+        const query = `
+            SELECT courier_id, COUNT(id) as number_of_deliveries 
+            FROM deliveries 
+            WHERE status = 'Successful' 
+            GROUP BY courier_id 
+            HAVING COUNT(id) > 5
+        `;
+        const [results] = await db.query(query);
+        res.json({ top_couriers: results });
+    } catch (err) {
+        next(err);
+    }
+};

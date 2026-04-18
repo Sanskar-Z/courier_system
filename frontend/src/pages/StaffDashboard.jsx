@@ -11,11 +11,12 @@ export default function StaffDashboard() {
     const [couriers, setCouriers] = useState([]);
     const [couriersLoading, setCouriersLoading] = useState(false);
     const [couriersError, setCouriersError] = useState('');
+    const [topCouriers, setTopCouriers] = useState([]);
 
     const availableTabs = useMemo(() => (
         role === 'admin'
-            ? ['events', 'delay', 'delivery', 'hub', 'courier', 'assign']
-            : ['events', 'delay', 'delivery', 'assign']
+            ? ['events', 'delay', 'delivery', 'hub', 'courier', 'assign', 'delete']
+            : ['events', 'delay', 'delivery', 'assign', 'delete']
     ), [role]);
 
     const loadCouriers = async () => {
@@ -31,9 +32,19 @@ export default function StaffDashboard() {
         }
     };
 
+    const loadTopCouriers = async () => {
+        try {
+            const response = await axios.get('/reports/top-couriers');
+            setTopCouriers(response.data.top_couriers || []);
+        } catch {
+            // Ignore error
+        }
+    };
+
     useEffect(() => {
         if (role !== 'customer') {
             loadCouriers();
+            loadTopCouriers();
         }
     }, [role]);
 
@@ -45,18 +56,16 @@ export default function StaffDashboard() {
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const handleAction = async (e, endpoint, isPut = false) => {
+    const handleAction = async (e, endpoint, isPut = false, isDelete = false) => {
         e.preventDefault();
         setStatusMsg('');
         setIsLoading(true);
         try {
-            const method = isPut ? axios.put : axios.post;
-            await method(endpoint, formData);
+            const method = isDelete ? axios.delete : isPut ? axios.put : axios.post;
+            await method(endpoint, isDelete ? undefined : formData);
             setStatusMsg('Action completed successfully!');
             setFormData({});
-            if (activeTab === 'courier') {
-                loadCouriers();
-            }
+            if (activeTab === 'courier') loadCouriers();
         } catch (err) {
             setStatusMsg(err.response?.data?.error || 'Action failed');
         } finally {
@@ -111,7 +120,7 @@ export default function StaffDashboard() {
                                 onClick={() => setActiveTab(tab)}
                                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                             >
-                                {tab === 'events' ? 'Log Event' : tab === 'delay' ? 'Report Delay' : tab === 'delivery' ? 'Record Delivery' : tab === 'hub' ? 'Add Hub' : tab === 'courier' ? 'Add Courier' : 'Assign Courier'}
+                                {tab === 'events' ? 'Log Event' : tab === 'delay' ? 'Report Delay' : tab === 'delivery' ? 'Record Delivery' : tab === 'hub' ? 'Add Hub' : tab === 'courier' ? 'Add Courier' : tab === 'assign' ? 'Assign Courier' : 'Delete Shipment'}
                             </button>
                         ))}
                     </div>
@@ -135,7 +144,7 @@ export default function StaffDashboard() {
                                 <div>
                                     <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Current Workflow</p>
                                     <h3 className="mt-3 text-xl font-semibold text-slate-900">
-                                        {activeTab === 'events' ? 'Log shipment event' : activeTab === 'delay' ? 'Report a delay' : activeTab === 'delivery' ? 'Record delivery outcome' : activeTab === 'hub' ? 'Create new hub' : activeTab === 'courier' ? 'Add a courier' : 'Assign courier'}
+                                        {activeTab === 'events' ? 'Log shipment event' : activeTab === 'delay' ? 'Report a delay' : activeTab === 'delivery' ? 'Record delivery outcome' : activeTab === 'hub' ? 'Create new hub' : activeTab === 'courier' ? 'Add a courier' : activeTab === 'assign' ? 'Assign courier' : 'Delete Shipment'}
                                     </h3>
                                 </div>
                                 <Activity className="h-8 w-8 text-blue-600" />
@@ -143,7 +152,7 @@ export default function StaffDashboard() {
                         </div>
 
                         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                            <form onSubmit={(e) => handleAction(e, activeTab === 'events' ? '/tracking/event' : activeTab === 'delay' ? '/tracking/delay' : activeTab === 'delivery' ? '/deliveries' : activeTab === 'hub' ? '/hubs' : activeTab === 'courier' ? '/couriers' : `/shipments/${formData.id}/assign`, activeTab === 'assign')} className="space-y-6">
+                            <form onSubmit={(e) => handleAction(e, activeTab === 'events' ? '/tracking/event' : activeTab === 'delay' ? '/tracking/delay' : activeTab === 'delivery' ? '/deliveries' : activeTab === 'hub' ? '/hubs' : activeTab === 'courier' ? '/couriers' : activeTab === 'assign' ? `/shipments/${formData.id}/assign` : `/shipments/${formData.id}`, activeTab === 'assign', activeTab === 'delete')} className="space-y-6">
                                 {(activeTab === 'events' || activeTab === 'delay' || activeTab === 'delivery') && (
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <input type="number" name="shipment_id" placeholder="Shipment ID" value={formData.shipment_id || ''} onChange={handleChange} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200" required />
@@ -207,7 +216,14 @@ export default function StaffDashboard() {
                                     </>
                                 )}
 
-                                <button type="submit" disabled={isLoading} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 text-white font-semibold shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                {activeTab === 'delete' && (
+                                    <>
+                                        <input type="number" name="id" placeholder="Shipment ID to delete" value={formData.id || ''} onChange={handleChange} className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 outline-none focus:ring-2 focus:ring-rose-300" required />
+                                        <p className="text-xs text-rose-600 px-2 font-medium bg-rose-100 rounded-lg py-2 mt-2 inline-block">Warning: This action will soft-delete the system record.</p>
+                                    </>
+                                )}
+
+                                <button type="submit" disabled={isLoading} className={`inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-white font-semibold shadow-lg transition disabled:cursor-not-allowed disabled:opacity-60 ${activeTab === 'delete' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
                                     {isLoading ? 'Processing...' : 'Submit Action'}
                                 </button>
                             </form>
@@ -264,6 +280,30 @@ export default function StaffDashboard() {
                                 <p>• Fast route updates</p>
                                 <p>• SLA tracking</p>
                                 <p>• Incident logging</p>
+                            </div>
+                        </div>
+                        
+                        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <Activity className="h-6 w-6 text-orange-600" />
+                                <div>
+                                    <p className="text-sm text-slate-500">Analytics</p>
+                                    <p className="mt-2 text-lg font-semibold text-slate-900">Top Couriers (&gt;5 Deliveries)</p>
+                                </div>
+                            </div>
+                            <div className="mt-4 text-sm text-slate-600">
+                                {topCouriers.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {topCouriers.map((tc, idx) => (
+                                            <div key={idx} className="flex justify-between items-center bg-slate-50 rounded-2xl border border-slate-100 px-3 py-2">
+                                                <span className="font-medium text-slate-800">Courier ID: {tc.courier_id}</span>
+                                                <span className="bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded-full font-semibold">{tc.number_of_deliveries} trips</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p>No couriers have exceeded 5 deliveries yet.</p>
+                                )}
                             </div>
                         </div>
                     </aside>

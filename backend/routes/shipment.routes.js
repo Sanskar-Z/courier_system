@@ -21,5 +21,6 @@ router.get('/:id', authenticate, shipmentController.getShipmentById);
 router.get('/report', authenticate, authorize(['admin', 'staff']), shipmentController.getSLAReport);
 router.put('/:id/assign', authenticate, authorize(['admin', 'staff']), shipmentController.assignCourier);
 router.post('/:id/hub', authenticate, authorize(['admin', 'staff']), shipmentController.linkHub);
+router.delete('/:id', authenticate, authorize(['admin', 'staff']), shipmentController.deleteShipment);
 
 export default router;

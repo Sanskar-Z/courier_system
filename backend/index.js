@@ -13,8 +13,6 @@ import couriersRoutes from './routes/couriers.routes.js';
 import employeesRoutes from './routes/employees.routes.js';
 import auditLogsRoutes from './routes/audit_logs.routes.js';
 import reportsRoutes from './routes/reports.routes.js';
-import deliveryFailuresRoutes from './routes/delivery_failures.routes.js';
-import damageLogsRoutes from './routes/damage_logs.routes.js';
 import delayLogsRoutes from './routes/delay_logs.routes.js';
 
 app.use(cors());
@@ -30,8 +28,6 @@ app.use('/api/couriers', couriersRoutes);
 app.use('/api/employees', employeesRoutes);
 app.use('/api/audit-logs', auditLogsRoutes);
 app.use('/api/reports', reportsRoutes);
-app.use('/api/delivery-failures', deliveryFailuresRoutes);
-app.use('/api/damage-logs', damageLogsRoutes);
 app.use('/api/delay-logs', delayLogsRoutes);
 
 app.get('/', (req, res) => res.json({ message: 'Courier System API' }));
