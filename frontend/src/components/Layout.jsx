@@ -29,8 +29,8 @@ export default function Layout() {
     { name: 'Track Shipment', href: '/track', icon: MapPin, roles: ['customer'] },
     { name: 'Staff Panel', href: '/staff', icon: BarChart3, roles: ['admin', 'staff'] },
     { name: 'Audit Logs', href: '/audit-logs', icon: FileText, roles: ['admin'] },
-    { name: 'Delivery Failures', href: '/delivery-failures', icon: FileText, roles: ['admin', 'staff'] },
-    { name: 'Damage Logs', href: '/damage-logs', icon: FileText, roles: ['admin', 'staff'] },
+    // { name: 'Delivery Failures', href: '/delivery-failures', icon: FileText, roles: ['admin', 'staff'] },
+    // { name: 'Damage Logs', href: '/damage-logs', icon: FileText, roles: ['admin', 'staff'] },
     { name: 'Employees', href: '/employee-management', icon: Users, roles: ['admin'] },
   ];
 
@@ -42,7 +42,7 @@ export default function Layout() {
       <nav className="border-b border-slate-200 bg-white/90 backdrop-blur-xl shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 text-slate-900">
-            {/* Logo */}
+
             <Link to="/" className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm">
                 <Package className="h-6 w-6" />
@@ -53,7 +53,7 @@ export default function Layout() {
               </div>
             </Link>
 
-            {/* User role display */}
+
             {role && (
               <span className="ml-4 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
                 {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -80,7 +80,6 @@ export default function Layout() {
               );
             })}
 
-            {/* Logout button */}
             <button
               onClick={handleLogout}
               className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
