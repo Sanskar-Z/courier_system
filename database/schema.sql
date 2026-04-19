@@ -169,7 +169,8 @@ CREATE TABLE damage_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     shipment_id INT NOT NULL,
     damage_description TEXT NOT NULL,
-    reported_by INT,  -- user_id
+    reported_by INT,
+    severity ENUM('Minor', 'Major', 'Critical') DEFAULT 'Minor',
     reported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE,
     FOREIGN KEY (reported_by) REFERENCES users(id) ON DELETE SET NULL

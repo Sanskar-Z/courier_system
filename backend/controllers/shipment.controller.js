@@ -179,15 +179,15 @@ export const assignCourier = async (req, res, next) => {
 
 export const getSLAReport = async (req, res, next) => {
     try {
-        const [breaches] = await db.query('SELECT count(*) as total_breaches FROM shipments WHERE is_sla_breached = TRUE AND is_deleted = FALSE');
-        const [total] = await db.query('SELECT count(*) as total_shipments FROM shipments WHERE is_deleted = FALSE');
-        const [delayed] = await db.query('SELECT count(distinct d.shipment_id) as delayed FROM delay_logs d JOIN shipments s ON d.shipment_id = s.id WHERE s.is_deleted = FALSE');
-        const [byService] = await db.query('SELECT service_type, count(*) as count FROM shipments WHERE is_deleted = FALSE GROUP BY service_type');
+        const [breaches] = await db.query('SELECT COUNT(*) as total_breaches FROM shipments WHERE is_sla_breached = TRUE AND is_deleted = FALSE');
+        const [total] = await db.query('SELECT COUNT(*) as total_shipments FROM shipments WHERE is_deleted = FALSE');
+        const [delayedRows] = await db.query('SELECT COUNT(DISTINCT d.shipment_id) as delayed_count FROM delay_logs d JOIN shipments s ON d.shipment_id = s.id WHERE s.is_deleted = FALSE');
+        const [byService] = await db.query('SELECT service_type, COUNT(*) as count FROM shipments WHERE is_deleted = FALSE GROUP BY service_type');
 
         res.json({
             total_shipments: total[0].total_shipments,
             sla_breaches: breaches[0].total_breaches,
-            delayed_shipments: delayed[0].delayed,
+            delayed_shipments: delayedRows[0].delayed_count,
             by_service: byService
         });
     } catch (err) {

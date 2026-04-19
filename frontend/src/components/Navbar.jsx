@@ -93,6 +93,41 @@ export default function Navbar() {
                 </Link>
               )}
 
+              {(role === 'admin' || role === 'staff') && (
+                <>
+                  <Link
+                    to="/reports"
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      location.pathname === '/reports'
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Reports
+                  </Link>
+                  <Link
+                    to="/delivery-failures"
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      location.pathname === '/delivery-failures'
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Failures
+                  </Link>
+                  <Link
+                    to="/damage-logs"
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      location.pathname === '/damage-logs'
+                        ? 'bg-slate-900 text-white'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Damage Logs
+                  </Link>
+                </>
+              )}
+
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"

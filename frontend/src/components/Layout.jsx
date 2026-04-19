@@ -8,7 +8,10 @@ import {
   LogOut,
   Menu,
   X,
-  Users
+  Users,
+  BarChart2,
+  AlertCircle,
+  ShieldAlert
 } from 'lucide-react';
 
 export default function Layout() {
@@ -28,9 +31,10 @@ export default function Layout() {
     { name: 'Book Shipment', href: '/book', icon: Package, roles: ['customer'] },
     { name: 'Track Shipment', href: '/track', icon: MapPin, roles: ['customer'] },
     { name: 'Staff Panel', href: '/staff', icon: BarChart3, roles: ['admin', 'staff'] },
+    { name: 'Reports', href: '/reports', icon: BarChart2, roles: ['admin', 'staff'] },
+    { name: 'Delivery Failures', href: '/delivery-failures', icon: AlertCircle, roles: ['admin', 'staff'] },
+    { name: 'Damage Logs', href: '/damage-logs', icon: ShieldAlert, roles: ['admin', 'staff'] },
     { name: 'Audit Logs', href: '/audit-logs', icon: FileText, roles: ['admin'] },
-    // { name: 'Delivery Failures', href: '/delivery-failures', icon: FileText, roles: ['admin', 'staff'] },
-    // { name: 'Damage Logs', href: '/damage-logs', icon: FileText, roles: ['admin', 'staff'] },
     { name: 'Employees', href: '/employee-management', icon: Users, roles: ['admin'] },
   ];
 
